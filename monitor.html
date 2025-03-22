@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Monitor</title>
+  <link rel="stylesheet" href="monitor.css" />
+  <link href="https://fonts.googleapis.com/css2?family=ABeeZee&display=swap" rel="stylesheet">
+</head>
+<script>
+  function goBack() {
+    window.location.href = "dashboard.html";
+  }
+</script>
+<body>
+  <div class="monitor-container">
+    <div class="overlay"></div>
+
+    <!-- Header -->
+    <div class="header">
+      <img src="images/fleche.png" alt="Back" class="back-icon" onclick="goBack()">
+      <h2>Rooms</h2>
+      <img src="images/user.png" alt="User" class="user-pic">
+    </div>
+
+    <!-- Power + Temp Cards -->
+    <div class="status-cards">
+      <div class="status-card">
+        <img src="images/power.png" class="status-icon" />
+        <div>
+          <p class="status-value">30.44 kWh</p>
+          <p class="status-label">Power usage today</p>
+        </div>
+      </div>
+
+      <div class="status-card">
+        <img src="images/temp.png" class="status-icon" />
+        <div>
+          <p class="status-value">22 degrees</p>
+          <p class="status-label">Outside temperature</p>
+        </div>
+      </div>
+    </div>
+
+<!-- Light Bulb + Fan Controls -->
+<div class="controls">
+  <!-- Light Control -->
+  <div class="control-card organized-card">
+    <div class="control-header">
+      <img src="images/light.png" class="control-icon" />
+      <p class="control-label">Light Bulb</p>
+    </div>
+
+    <div class="toggle-group">
+      <span class="toggle-text off">OFF</span>
+      <label class="switch">
+        <input type="checkbox" id="light-toggle" checked />
+        <span class="slider round"></span>
+      </label>
+      <span class="toggle-text on">ON</span>
+    </div>
+
+    <div class="intensity-slider">
+      <label for="brightness">Intensity</label>
+      <input
+        type="range"
+        id="brightness"
+        min="0"
+        max="255"
+        value="128"
+        oninput="updateBrightnessLabel(this.value)"
+      />
+      <span id="brightness-value">Value: 128</span>
+    </div>
+  </div>
+
+    <!-- Fan Control -->
+    <div class="control-card organized-card">
+      <div class="control-header">
+        <img src="images/fan.png" class="control-icon" />
+        <p class="control-label">Fan</p>
+      </div>
+
+      <div class="toggle-group">
+        <span class="toggle-text off">OFF</span>
+        <label class="switch">
+          <input type="checkbox" id="fan-toggle" />
+          <span class="slider round"></span>
+        </label>
+        <span class="toggle-text on">ON</span>
+      </div>
+
+      <div class="intensity-slider">
+        <label for="fan-speed">Intensity</label>
+        <input
+          type="range"
+          id="fan-speed"
+          min="0"
+          max="255"
+          value="128"
+          oninput="updateFanLabel(this.value)"
+        />
+        <span id="fan-value">Value: 128</span>
+      </div>
+    </div>
+  </div>
+    
+  </div>
+
+    <!-- Bottom Navbar -->
+    <img src="images/navbar.png" class="navbar" />
+  </div>
+</body>
+</html>

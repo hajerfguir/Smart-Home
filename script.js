@@ -1,4 +1,11 @@
-document.getElementById("get-started").addEventListener("click", function() {
-    alert("Next Page Navigation Placeholder"); 
-    // Replace this with: window.location.href = "dashboard.html";
-});
+document.getElementById("get-started").addEventListener("click", function () {
+    window.location.href = "dashboard.html";
+  });
+  function goToMonitor() {
+    window.location.href = "monitor.html";
+  }
+  function goBack() {
+    window.history.back();
+  }
+  
+  

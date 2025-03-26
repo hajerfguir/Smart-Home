@@ -2,113 +2,179 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Monitor</title>
   <link rel="stylesheet" href="monitor.css" />
   <link href="https://fonts.googleapis.com/css2?family=ABeeZee&display=swap" rel="stylesheet">
 </head>
 <script>
-  function goBack() {
-    window.location.href = "dashboard.html";
+  const ESP_IP = "http://192.168.4.1"; 
+
+  function fetchTemperature() {
+    fetch(`${ESP_IP}/temperature`)
+      .then(response => response.text())
+      .then(temp => {
+        document.getElementById('temp-value').textContent = temp + " °C";
+      });
   }
+
+  function fetchHumidity() {
+    fetch(`${ESP_IP}/humidity`)
+      .then(response => response.text())
+      .then(hum => {
+        document.getElementById('humidity-value').textContent = hum + " %";
+      });
+  }
+
+  function updateBrightnessLabel(value) {
+    document.getElementById('brightness-value').textContent = "Value: " + value;
+    fetch(`${ESP_IP}/led/intensity`, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: `value=${value}`
+    });
+  }
+
+  function updateFanLabel(value) {
+    document.getElementById('fan-value').textContent = "Value: " + value;
+    fetch(`${ESP_IP}/fan/intensity`, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: `value=${value}`
+    });
+  }
+
+  function toggleDevice(endpoint, state) {
+    fetch(`${ESP_IP}/${endpoint}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: `state=${state}`
+    });
+  
+  }
+
+  window.onload = () => {
+    // Real-time control
+    document.getElementById("brightness").oninput = (e) => updateBrightnessLabel(e.target.value);
+    document.getElementById("fan-speed").oninput = (e) => updateFanLabel(e.target.value);
+
+    document.getElementById("light-toggle").onchange = (e) => {
+      toggleDevice("led", e.target.checked ? "on" : "off");
+    };
+
+    document.getElementById("fan-toggle").onchange = (e) => {
+      toggleDevice("fan", e.target.checked ? "on" : "off");
+    };
+
+    // Live data fetch loop
+    setInterval(() => {
+      fetchTemperature();
+      fetchHumidity();
+    }, 3000);
+
+    // Preload LED state and brightness
+    fetch(`${ESP_IP}/led/state`)
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById("light-toggle").checked = data.state === "on";
+        document.getElementById("brightness").value = data.brightness;
+        document.getElementById("brightness-value").textContent = "Value: " + data.brightness;
+      });
+
+    // Preload FAN state and speed
+    fetch(`${ESP_IP}/fan/state`)
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById("fan-toggle").checked = data.state === "on";
+        document.getElementById("fan-speed").value = data.speed;
+        document.getElementById("fan-value").textContent = "Value: " + data.speed;
+      });
+  };
 </script>
+
 <body>
   <div class="monitor-container">
     <div class="overlay"></div>
 
     <!-- Header -->
     <div class="header">
-      <img src="images/fleche.png" alt="Back" class="back-icon" onclick="goBack()">
+      <img src="images/fleche.png" alt="Back" class="back-icon" onclick="window.location.href='dashboard.html'">
       <h2>Rooms</h2>
       <img src="images/user.png" alt="User" class="user-pic">
     </div>
 
-    <!-- Power + Temp Cards -->
+    <!-- Humidity + Temp Cards -->
     <div class="status-cards">
       <div class="status-card">
-        <img src="images/power.png" class="status-icon" />
+        <img src="images/humidity.png" class="status-icon" />
         <div>
-          <p class="status-value">30.44 kWh</p>
-          <p class="status-label">Power usage today</p>
+          <p class="status-value" id="humidity-value">-- %</p>
+          <p class="status-label">Outside Humidity</p>
         </div>
       </div>
 
       <div class="status-card">
         <img src="images/temp.png" class="status-icon" />
         <div>
-          <p class="status-value">22 degrees</p>
+          <p class="status-value" id="temp-value">-- °C</p>
           <p class="status-label">Outside temperature</p>
         </div>
       </div>
     </div>
 
-<!-- Light Bulb + Fan Controls -->
-<div class="controls">
-  <!-- Light Control -->
-  <div class="control-card organized-card">
-    <div class="control-header">
-      <img src="images/light.png" class="control-icon" />
-      <p class="control-label">Light Bulb</p>
-    </div>
+    <!-- Light Bulb + Fan Controls -->
+    <div class="controls">
+      <!-- Light Control -->
+      <div class="control-card organized-card">
+        <div class="control-header">
+          <img src="images/light.png" class="control-icon" />
+          <p class="control-label">Light Bulb</p>
+        </div>
 
-    <div class="toggle-group">
-      <span class="toggle-text off">OFF</span>
-      <label class="switch">
-        <input type="checkbox" id="light-toggle" checked />
-        <span class="slider round"></span>
-      </label>
-      <span class="toggle-text on">ON</span>
-    </div>
+        <div class="toggle-group">
+          <span class="toggle-text off">OFF</span>
+          <label class="switch">
+            <input type="checkbox" id="light-toggle" />
+            <span class="slider round"></span>
+          </label>
+          <span class="toggle-text on">ON</span>
+        </div>
 
-    <div class="intensity-slider">
-      <label for="brightness">Intensity</label>
-      <input
-        type="range"
-        id="brightness"
-        min="0"
-        max="255"
-        value="128"
-        oninput="updateBrightnessLabel(this.value)"
-      />
-      <span id="brightness-value">Value: 128</span>
-    </div>
-  </div>
-
-    <!-- Fan Control -->
-    <div class="control-card organized-card">
-      <div class="control-header">
-        <img src="images/fan.png" class="control-icon" />
-        <p class="control-label">Fan</p>
+        <div class="intensity-slider">
+          <label for="brightness">Intensity</label>
+          <input type="range" id="brightness" min="0" max="255" value="128" />
+          <span id="brightness-value">Value: 128</span>
+        </div>
       </div>
 
-      <div class="toggle-group">
-        <span class="toggle-text off">OFF</span>
-        <label class="switch">
-          <input type="checkbox" id="fan-toggle" />
-          <span class="slider round"></span>
-        </label>
-        <span class="toggle-text on">ON</span>
-      </div>
+      <!-- Fan Control -->
+      <div class="control-card organized-card">
+        <div class="control-header">
+          <img src="images/fan.png" class="control-icon" />
+          <p class="control-label">Fan</p>
+        </div>
 
-      <div class="intensity-slider">
-        <label for="fan-speed">Intensity</label>
-        <input
-          type="range"
-          id="fan-speed"
-          min="0"
-          max="255"
-          value="128"
-          oninput="updateFanLabel(this.value)"
-        />
-        <span id="fan-value">Value: 128</span>
+        <div class="toggle-group">
+          <span class="toggle-text off">OFF</span>
+          <label class="switch">
+            <input type="checkbox" id="fan-toggle" />
+            <span class="slider round"></span>
+          </label>
+          <span class="toggle-text on">ON</span>
+        </div>
+
+        <div class="intensity-slider">
+          <label for="fan-speed">Intensity</label>
+          <input type="range" id="fan-speed" min="0" max="255" value="128" />
+          <span id="fan-value">Value: 128</span>
+        </div>
       </div>
     </div>
-  </div>
-    
-  </div>
 
     <!-- Bottom Navbar -->
     <img src="images/navbar.png" class="navbar" />
   </div>
+
+  
 </body>
 </html>

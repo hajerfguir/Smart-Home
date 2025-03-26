@@ -7,5 +7,4 @@ document.getElementById("get-started").addEventListener("click", function () {
   function goBack() {
     window.history.back();
   }
-  
-  
+
